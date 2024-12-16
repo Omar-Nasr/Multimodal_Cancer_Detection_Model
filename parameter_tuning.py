@@ -87,12 +87,10 @@ def objective(trial):
                 print(f'Epoch {epoch}/{num_epochs - 1}\n')
                 f.write('-' * 10 + "\n")
                 print('-' * 10 + "\n")
-
-                val_preds = []
-                val_labels = []
-           # Each epoch has a training and validation phase
+                     # Each epoch has a training and validation phase
                 for phase in ['train', 'val']: 
-
+                    val_preds = []
+                    val_labels = []
                     running_loss = 0.0
                     running_corrects = 0
 
