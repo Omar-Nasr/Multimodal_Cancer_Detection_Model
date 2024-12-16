@@ -130,6 +130,8 @@ def objective(trial):
                                 running_corrects += torch.sum(preds == labels.data)
                     val_preds = np.concatenate(val_preds)
                     val_labels = np.concatenate(val_labels)
+                    val_preds = torch.from_numpy(val_preds)
+                    val_labels = torch.from_numpy(val_labels)
                     f1 = Calc_F1(val_preds,val_labels)
                     precision = Calc_Prec(val_preds,val_labels)
                     recall = Calc_Recall(val_preds,val_labels)
