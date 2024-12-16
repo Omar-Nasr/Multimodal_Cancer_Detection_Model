@@ -1,4 +1,5 @@
 from data_handler import BiradsDataSet
+import numpy as np
 import optuna
 import os
 from optuna.trial import TrialState
@@ -87,6 +88,8 @@ def objective(trial):
                 f.write('-' * 10 + "\n")
                 print('-' * 10 + "\n")
 
+                val_preds = []
+                val_labels = []
            # Each epoch has a training and validation phase
                 for phase in ['train', 'val']: 
 
@@ -95,8 +98,6 @@ def objective(trial):
 
                     # Iterate over data.
 
-                    val_preds = []
-                    val_labels = []
                     for inputs, inputs2, labels in dataloaders[phase]:
 
                                 inputs = inputs.to(device)
@@ -122,12 +123,13 @@ def objective(trial):
                                         optimizer.step()
                                         optimizer2.step()
                                         optimizer_class.step()
-                                    if phase == "val":
-                                        val_preds.append(preds.cpu())
-                                        val_labels.append(labels.cpu())
+                                    val_preds.append(preds.cpu())
+                                    val_labels.append(labels.cpu())
                     # statistics
                                 running_loss += loss.item() * inputs.size(0)
                                 running_corrects += torch.sum(preds == labels.data)
+                    val_preds = np.concatenate(val_preds)
+                    val_labels = np.concatenate(val_labels)
                     f1 = Calc_F1(val_preds,val_labels)
                     precision = Calc_Prec(val_preds,val_labels)
                     recall = Calc_Recall(val_preds,val_labels)
@@ -137,8 +139,8 @@ def objective(trial):
                     f.write(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}\n')
                     print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}\n')
 
-                    f.write(f'F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
-                    print(f'F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
+                    f.write(f'{phase} F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
+                    print(f'{phase} F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
                     # deep copy the model
                     if phase == 'val' and epoch_acc > best_acc:
                     
