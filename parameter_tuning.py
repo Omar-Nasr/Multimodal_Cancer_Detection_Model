@@ -25,7 +25,7 @@ num_classes=7
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 Train_Ds =  BiradsDataSet(data_dir,modality)
 Val_Ds =  BiradsDataSet(data_dir,modality)
-batch_sz = 1
+batch_sz = 16
 dataloaders = {}
 datasetsizes = {}
 criterion = FocalLoss()
@@ -79,9 +79,9 @@ def objective(trial):
             f.write("Modality:" + modality + "\n")
             print("Modality:" + modality + "\n")
 
-            Calc_F1 = F1Score(task="multiclass",num_classes=num_classes)
-            Calc_Prec = Precision(task="multiclass",num_classes=num_classes)
-            Calc_Recall = Recall(task="multiclass",num_classes=num_classes)
+            Calc_F1 = F1Score(task="multiclass",num_classes=num_classes,average="macro")
+            Calc_Prec = Precision(task="multiclass",num_classes=num_classes,average="macro")
+            Calc_Recall = Recall(task="multiclass",num_classes=num_classes,average="macro")
             for epoch in range(num_epochs):
                 f.write(f'Epoch {epoch}/{num_epochs - 1}\n')
                 print(f'Epoch {epoch}/{num_epochs - 1}\n')
