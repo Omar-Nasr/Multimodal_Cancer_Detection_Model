@@ -4,9 +4,10 @@ import os
 from optuna.trial import TrialState
 import torch
 import sys
-sys.path.insert(0,"/home/omar/Programming/Grad_Project_Again/UltraSoundWithMammo/DataSetCurrent/BiradsModel/Birads/Transformer-Explainability/")
+sys.path.insert(0,"/kaggle/working/Multimodal_Cancer_Detection_Model/Transformer-Explainability")
 from baselines.ViT.ViT_LRP import vit_base_patch16_224 as vit_LRP
 from baselines.ViT.ViT_explanation_generator import LRP
+from torchmetrics import F1Score,Recall,Precision
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
@@ -17,7 +18,7 @@ from torchvision.io import ImageReadMode
 from torch.utils.data import DataLoader 
 from torchvision import models
 
-data_dir = "/home/omar/Programming/Grad_Project_Again/UltraSoundWithMammo/Dataset_Extracted"
+data_dir = "/kaggle/working/content/Dataset"
 modality="Multimodal"
 num_classes=7
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
@@ -66,9 +67,8 @@ def objective(trial):
     optimizer = getattr(optim, optimizer_name)(model.parameters(), lr=lr)
     optimizer2 = getattr(optim, optimizer_name)(model2.parameters(), lr=lr)
     optimizer_class =  getattr(optim, optimizer_name)(classification_layer.parameters(), lr=lr2)
-    path = "/home/omar/Programming/Grad_Project_Again/UltraSoundWithMammo/DataSetCurrent/BiradsModel/Birads/checkpoint_path"
+    path = "/kaggle/working/checkpoint_path"
     best_model_params_path = os.path.join(path,"best_model_params_"+model_name+"_Mammo" + modality + ".pt")
-
     best_model_params_path3 = os.path.join(path,"best_model_params_"+model_name+"_Ultra" + modality + ".pt")
     best_model_params_path2 = os.path.join(path,"best_model_params_"+model_name+"_classifier_" + modality + ".pt")
     with open("logs"+"_"+"model_name","a") as f:
@@ -77,6 +77,10 @@ def objective(trial):
             print("model name:" + model_name + "\n")
             f.write("Modality:" + modality + "\n")
             print("Modality:" + modality + "\n")
+
+            Calc_F1 = F1Score(task="multiclass",num_classes=num_classes)
+            Calc_Prec = Precision(task="multiclass",num_classes=num_classes)
+            Calc_Recall = Recall(task="multiclass",num_classes=num_classes)
             for epoch in range(num_epochs):
                 f.write(f'Epoch {epoch}/{num_epochs - 1}\n')
                 print(f'Epoch {epoch}/{num_epochs - 1}\n')
@@ -90,7 +94,11 @@ def objective(trial):
                     running_corrects = 0
 
                     # Iterate over data.
+
+                    val_preds = []
+                    val_labels = []
                     for inputs, inputs2, labels in dataloaders[phase]:
+
                                 inputs = inputs.to(device)
                                 inputs2 = inputs2.to(device)
                                 labels = labels.to(device)
@@ -114,17 +122,26 @@ def objective(trial):
                                         optimizer.step()
                                         optimizer2.step()
                                         optimizer_class.step()
+                                    if phase == "val":
+                                        val_preds.append(preds.cpu())
+                                        val_labels.append(labels.cpu())
                     # statistics
                                 running_loss += loss.item() * inputs.size(0)
                                 running_corrects += torch.sum(preds == labels.data)
-
+                    f1 = Calc_F1(val_preds,val_labels)
+                    precision = Calc_Prec(val_preds,val_labels)
+                    recall = Calc_Recall(val_preds,val_labels)
                     epoch_loss = running_loss / datasetsizes[phase]
                     epoch_acc = running_corrects.double() / datasetsizes[phase]
 
                     f.write(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}\n')
                     print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}\n')
+
+                    f.write(f'F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
+                    print(f'F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
                     # deep copy the model
                     if phase == 'val' and epoch_acc > best_acc:
+                    
                         best_acc = epoch_acc
                         torch.save(model.state_dict(), best_model_params_path3)
                         print("saved ultra model")
