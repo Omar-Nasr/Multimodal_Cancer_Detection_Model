@@ -126,7 +126,7 @@ ID	Mammogram	UltraSound	MRI	Report	Classification
 02450y20	Yes	Yes	No	Yes	BIRADS2
 0812y15	Yes	Yes	No	Yes	BIRADS2
 01277y20	Yes	Yes	No	Yes	BIRADS1
-0115y14	Yes	Yes	No	Yes	BIRADSS
+0115y14	Yes	Yes	No	Yes	BIRADS2
 2640y17	Yes	Yes	No	Yes	BIRADS2
 2226y18	Yes	Yes	No	Yes	BIRADS2
 00338y23	Yes	Yes	No	Yes	CLIPINSERTION
