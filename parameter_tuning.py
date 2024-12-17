@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 from torchvision import models
 
 data_dir = "/kaggle/working/content/Dataset"
-modality="Mammogram"
+modality="UltraSound"
 num_classes=7
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 Train_Ds =  BiradsDataSet(data_dir,modality)
@@ -200,7 +200,7 @@ def objective(trial):
             return epoch_acc
 
 study = optuna.create_study(direction="maximize")
-study.optimize(objective, n_trials=10)
+study.optimize(objective, n_trials=1)
 pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
 complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
