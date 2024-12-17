@@ -135,30 +135,30 @@ def objective(trial):
                         # statistics
                                     running_loss += loss.item() * inputs.size(0)
                                     running_corrects += torch.sum(preds == labels.data)
-                        else:
-                            for inputs, labels in dataloaders[phase]:
+                    else:
+                        for inputs, labels in dataloaders[phase]:
 
-                                        inputs = inputs.to(device)
-                                        labels = labels.to(device)
-                                        # zero the parameter gradients
-                                        optimizer.zero_grad()
-                                        optimizer_class.zero_grad()
-                                        features = model(inputs)
-                                        with torch.set_grad_enabled(phase == 'train'):
-                                            outputs = classification_layer(features)
-                                            _, preds = torch.max(outputs, 1)
-                                            loss = criterion(outputs, labels)
+                                    inputs = inputs.to(device)
+                                    labels = labels.to(device)
+                                    # zero the parameter gradients
+                                    optimizer.zero_grad()
+                                    optimizer_class.zero_grad()
+                                    features = model(inputs)
+                                    with torch.set_grad_enabled(phase == 'train'):
+                                        outputs = classification_layer(features)
+                                        _, preds = torch.max(outputs, 1)
+                                        loss = criterion(outputs, labels)
 
-                                            # backward + optimize only if in training phase
-                                            if phase == 'train':
-                                                loss.backward()
-                                                optimizer.step()
-                                                optimizer_class.step()
-                                        val_preds.append(preds.cpu())
-                                        val_labels.append(labels.cpu())
-                        # statistics
-                                        running_loss += loss.item() * inputs.size(0)
-                                        running_corrects += torch.sum(preds == labels.data)
+                                        # backward + optimize only if in training phase
+                                        if phase == 'train':
+                                            loss.backward()
+                                            optimizer.step()
+                                            optimizer_class.step()
+                                    val_preds.append(preds.cpu())
+                                    val_labels.append(labels.cpu())
+                    # statistics
+                                    running_loss += loss.item() * inputs.size(0)
+                                    running_corrects += torch.sum(preds == labels.data)
                     val_preds = np.concatenate(val_preds)
                     val_labels = np.concatenate(val_labels)
                     val_preds = torch.from_numpy(val_preds)
