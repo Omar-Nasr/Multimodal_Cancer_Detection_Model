@@ -38,7 +38,7 @@ class BiradsDataSet(Dataset):
         extra_labels = []
         for i,img_dir in enumerate(train_img_dirs): 
             if(train_labels[i]>3):
-                for j in range(10):
+                for j in range(5):
                     extra_imgs.append(img_dir)
                     extra_labels.append(train_labels[i])
 
