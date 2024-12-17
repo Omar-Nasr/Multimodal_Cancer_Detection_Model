@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0,"/kaggle/working/Multimodal_Cancer_Detection_Model/Transformer-Explainability")
 from baselines.ViT.ViT_LRP import vit_base_patch16_224 as vit_LRP
 from baselines.ViT.ViT_explanation_generator import LRP
-from torchmetrics import F1Score,Recall,Precision
+from torchmetrics import F1Score,Recall,Precision,Accuracy
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
@@ -88,6 +88,7 @@ def objective(trial):
             Calc_F1 = F1Score(task="multiclass",num_classes=num_classes,average="macro")
             Calc_Prec = Precision(task="multiclass",num_classes=num_classes,average="macro")
             Calc_Recall = Recall(task="multiclass",num_classes=num_classes,average="macro")
+            Calc_Acc = Accuracy(task="multiclass",num_classes=num_classes)
             for epoch in range(num_epochs):
                 f.write(f'Epoch {epoch}/{num_epochs - 1}\n')
                 print(f'Epoch {epoch}/{num_epochs - 1}\n')
@@ -164,6 +165,7 @@ def objective(trial):
                     val_preds = torch.from_numpy(val_preds)
                     val_labels = torch.from_numpy(val_labels)
                     f1 = Calc_F1(val_preds,val_labels)
+                    acc = Calc_Acc(val_preds,val_labels)
                     precision = Calc_Prec(val_preds,val_labels)
                     recall = Calc_Recall(val_preds,val_labels)
                     epoch_loss = running_loss / datasetsizes[phase]
@@ -172,8 +174,8 @@ def objective(trial):
                     f.write(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}\n')
                     print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}\n')
 
-                    f.write(f'{phase} F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
-                    print(f'{phase} F1_Score: {f1} Precision : {precision} Recall : {recall}\n')
+                    f.write(f'{phase} F1_Score: {f1} Precision : {precision} Recall : {recall} Accuracy: {acc}\n')
+                    print(f'{phase} F1_Score: {f1} Precision : {precision} Recall : {recall} Accuracy : {acc}\n')
                     # deep copy the model
                     if phase == 'val' and epoch_acc > best_acc:
                     
