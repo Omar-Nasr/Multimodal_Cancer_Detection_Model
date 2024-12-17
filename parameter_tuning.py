@@ -20,12 +20,12 @@ from torch.utils.data import DataLoader
 from torchvision import models
 
 data_dir = "/kaggle/working/content/Dataset"
-modality="Multimodal"
+modality="Mammogram"
 num_classes=7
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 Train_Ds =  BiradsDataSet(data_dir,modality)
 Val_Ds =  BiradsDataSet(data_dir,modality)
-batch_sz = 16
+batch_sz = 8
 dataloaders = {}
 datasetsizes = {}
 criterion = FocalLoss()
@@ -33,7 +33,7 @@ dataloaders["train"] = DataLoader(Train_Ds,batch_sz,shuffle=True,num_workers=12)
 dataloaders["val"] = DataLoader(Val_Ds,batch_sz,num_workers=12)
 datasetsizes["train"] = len(Train_Ds)
 datasetsizes["val"] = len(Val_Ds)
-num_epochs=7
+num_epochs=5
 best_acc=0
 def objective(trial):
     global best_acc
@@ -52,7 +52,8 @@ def objective(trial):
         #model = models.vit_b_16(pretrained=True)
         #model2 = models.vit_b_16(pretrained=True)
         model = vit_LRP(pretrained=True)
-        model2 = vit_LRP(pretrained=True)
+        if(modality=="Multimodal"):
+            model2 = vit_LRP(pretrained=True)
     elif(model_name=="convnext"):
         model = models.convnext.convnext_base(pretrained=True)
         model2 = models.convnext.convnext_base(pretrained=True)
@@ -61,12 +62,17 @@ def objective(trial):
         model2 = models.maxvit_t(pretrained=True)
     dropout_rate = 0.18
     model.to(device)
-    model2.to(device)
+    if(modality=="Multimodal"):
+        model2.to(device)
 
-    classification_layer = nn.Sequential(nn.Dropout(dropout_rate),nn.Linear(2000,2000),nn.GELU(),nn.Dropout(dropout_rate),nn.Linear(2000,num_classes))
+    if(modality=="Multimodal"):
+        classification_layer = nn.Sequential(nn.Dropout(dropout_rate),nn.Linear(2000,2000),nn.GELU(),nn.Dropout(dropout_rate),nn.Linear(2000,num_classes))
+    else:
+        classification_layer = nn.Sequential(nn.Dropout(dropout_rate),nn.Linear(1000,1000),nn.GELU(),nn.Dropout(dropout_rate),nn.Linear(1000,num_classes))
     classification_layer.to(device)
     optimizer = getattr(optim, optimizer_name)(model.parameters(), lr=lr)
-    optimizer2 = getattr(optim, optimizer_name)(model2.parameters(), lr=lr)
+    if(modality=="Multimodal"):
+        optimizer2 = getattr(optim, optimizer_name)(model2.parameters(), lr=lr)
     optimizer_class =  getattr(optim, optimizer_name)(classification_layer.parameters(), lr=lr2)
     path = "/kaggle/working/checkpoint_path"
     best_model_params_path = os.path.join(path,"best_model_params_"+model_name+"_Mammo" + modality + ".pt")
@@ -103,13 +109,17 @@ def objective(trial):
                                 labels = labels.to(device)
                                 # zero the parameter gradients
                                 optimizer.zero_grad()
+                                optimizer_class.zero_grad()
+                                if(modality=="Multimodal"):
+                                    optimizer2.zero_grad()
 
                                 # forward
                                 # track history if only in train
 
-                                features1 = model(inputs)
-                                features2 = model2(inputs2)
-                                features = torch.cat([features1,features2],dim=1)
+                                features = model(inputs)
+                                if(modality=="Multimodal"):
+                                    features2 = model2(inputs2)
+                                    features = torch.cat([features,features2],dim=1)
                                 with torch.set_grad_enabled(phase == 'train'):
                                     outputs = classification_layer(features)
                                     _, preds = torch.max(outputs, 1)
@@ -119,7 +129,8 @@ def objective(trial):
                                     if phase == 'train':
                                         loss.backward()
                                         optimizer.step()
-                                        optimizer2.step()
+                                        if(modality=="Multimodal"):
+                                            optimizer2.step()
                                         optimizer_class.step()
                                     val_preds.append(preds.cpu())
                                     val_labels.append(labels.cpu())
