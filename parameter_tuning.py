@@ -180,7 +180,8 @@ def objective(trial):
                         best_acc = epoch_acc
                         torch.save(model.state_dict(), best_model_params_path3)
                         print("saved ultra model")
-                        torch.save(model2.state_dict(),best_model_params_path)
+                        if(modality=="Multimodal"):
+                            torch.save(model2.state_dict(),best_model_params_path)
                         print("saved mammo model")
                         torch.save(classification_layer,best_model_params_path2)
                         print("saved classifier")
