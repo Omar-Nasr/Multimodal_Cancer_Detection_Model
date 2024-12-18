@@ -33,7 +33,7 @@ dataloaders["train"] = DataLoader(Train_Ds,batch_sz,shuffle=True,num_workers=12)
 dataloaders["val"] = DataLoader(Val_Ds,batch_sz,num_workers=12)
 datasetsizes["train"] = len(Train_Ds)
 datasetsizes["val"] = len(Val_Ds)
-num_epochs=8
+num_epochs=20
 best_acc=0
 def objective(trial):
     global best_acc
