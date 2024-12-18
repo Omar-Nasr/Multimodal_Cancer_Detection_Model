@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 from torchvision import models
 
 data_dir = "/kaggle/working/content/Dataset"
-modality="UltraSound"
+modality="Multimodal"
 num_classes=7
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 Train_Ds =  BiradsDataSet(data_dir,modality)
