@@ -32,7 +32,7 @@ class BiradsDataSet(Dataset):
             self.modality="Multimodal"
             self.img_dirs = np.rec.fromarrays([img_dirs1,img_dirs2])
                 
-        train_img_dirs,val_imgs,train_labels,val_labels = train_test_split(self.img_dirs,self.labels,test_size=0.2,stratify=self.labels,random_state=42)
+        train_img_dirs,val_imgs,train_labels,val_labels = train_test_split(self.img_dirs,self.labels,test_size=0.3,stratify=self.labels,random_state=42)
      
         extra_imgs = []
         extra_labels = []
