@@ -33,7 +33,7 @@ dataloaders["train"] = DataLoader(Train_Ds,batch_sz,shuffle=True,num_workers=12)
 dataloaders["val"] = DataLoader(Val_Ds,batch_sz,num_workers=12)
 datasetsizes["train"] = len(Train_Ds)
 datasetsizes["val"] = len(Val_Ds)
-num_epochs=7
+num_epochs=10
 best_acc=0
 def objective(trial):
     global best_acc
@@ -210,12 +210,47 @@ print("Study statistics: ")
 print("  Number of finished trials: ", len(study.trials))
 print("  Number of pruned trials: ", len(pruned_trials))
 print("  Number of complete trials: ", len(complete_trials))
+#
 
-print("Best trial:")
-trial = study.best_trial
-
-print("  Value: ", trial.value)
-
-print("  Params: ")
-for key, value in trial.params.items():
-    print("    {}: {}".format(key, value))
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=1)
+pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
+complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
+modality="Multimodal"
+num_classes=7
+device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+Train_Ds =  BiradsDataSet(data_dir,modality)
+Val_Ds =  BiradsDataSet(data_dir,modality)
+batch_sz = 8
+dataloaders = {}
+datasetsizes = {}
+criterion = FocalLoss()
+dataloaders["train"] = DataLoader(Train_Ds,batch_sz,shuffle=True,num_workers=12)
+dataloaders["val"] = DataLoader(Val_Ds,batch_sz,num_workers=12)
+datasetsizes["train"] = len(Train_Ds)
+datasetsizes["val"] = len(Val_Ds)
+num_epochs=10
+best_acc=0
+modality="Mammogram"
+num_classes=7
+device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+Train_Ds =  BiradsDataSet(data_dir,modality)
+Val_Ds =  BiradsDataSet(data_dir,modality)
+batch_sz = 8
+dataloaders = {}
+datasetsizes = {}
+criterion = FocalLoss()
+dataloaders["train"] = DataLoader(Train_Ds,batch_sz,shuffle=True,num_workers=12)
+dataloaders["val"] = DataLoader(Val_Ds,batch_sz,num_workers=12)
+datasetsizes["train"] = len(Train_Ds)
+datasetsizes["val"] = len(Val_Ds)
+num_epochs=10
+best_acc=0
+# print("Best trial:")
+# trial = study.best_trial
+#
+# print("  Value: ", trial.value)
+#
+# print("  Params: ")
+# for key, value in trial.params.items():
+#     print("    {}: {}".format(key, value))
