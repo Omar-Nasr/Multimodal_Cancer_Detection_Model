@@ -202,7 +202,7 @@ def objective(trial):
             return epoch_acc
 
 study = optuna.create_study(direction="maximize")
-study.optimize(objective, n_trials=1)
+study.optimize(objective, n_trials=5)
 pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
 complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
@@ -212,10 +212,6 @@ print("  Number of pruned trials: ", len(pruned_trials))
 print("  Number of complete trials: ", len(complete_trials))
 #
 
-study = optuna.create_study(direction="maximize")
-study.optimize(objective, n_trials=1)
-pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
-complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 modality="Multimodal"
 num_classes=7
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
@@ -231,6 +227,11 @@ datasetsizes["train"] = len(Train_Ds)
 datasetsizes["val"] = len(Val_Ds)
 num_epochs=10
 best_acc=0
+
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=3)
+pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
+complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 modality="Mammogram"
 num_classes=7
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
@@ -246,6 +247,10 @@ datasetsizes["train"] = len(Train_Ds)
 datasetsizes["val"] = len(Val_Ds)
 num_epochs=10
 best_acc=0
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=10)
+pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
+complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 # print("Best trial:")
 # trial = study.best_trial
 #
